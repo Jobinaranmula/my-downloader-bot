@@ -1,6 +1,7 @@
 import os
 import yt_dlp
 import logging
+import asyncio
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
@@ -17,30 +18,38 @@ async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = update.message.text
     if "http" not in url:
         return
-
     msg = await update.message.reply_text('വീഡിയോ റെഡിയാക്കുന്നു... ദയവായി കാത്തിരിക്കൂ ⏳')
-
     ydl_opts = {
         'format': 'best',
         'outtmpl': 'video.mp4',
         'quiet': True,
         'no_warnings': True
     }
-
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
-        
         await update.message.reply_video(video=open('video.mp4', 'rb'))
         await msg.delete()
         os.remove('video.mp4') 
     except Exception as e:
-        await update.message.reply_text(f'ക്ഷമിക്കണം, ഈ ലിങ്ക് ഡൗൺലോഡ് ചെയ്യാൻ പറ്റിയില്ല. ❌')
+        await update.message.reply_text('ക്ഷമിക്കണം, ഈ ലിങ്ക് ഡൗൺലോഡ് ചെയ്യാൻ പറ്റിയില്ല. ❌')
 
-if __name__ == '__main__':
+async def main():
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, download_video))
     
-    # Render-ൽ റൺ ചെയ്യാൻ ഇതാണ് നല്ല വഴി
-    app.run_polling(drop_pending_updates=True)
+    async with app:
+        await app.initialize()
+        await app.start()
+        print("Bot is running...")
+        await app.updater.start_polling(drop_pending_updates=True)
+        # Keep the bot running
+        while True:
+            await asyncio.sleep(3600)
+
+if __name__ == '__main__':
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        pass
