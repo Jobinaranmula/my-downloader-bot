@@ -35,10 +35,12 @@ async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await msg.delete()
         os.remove('video.mp4') 
     except Exception as e:
-        await update.message.reply_text('ക്ഷമിക്കണം, ഈ ലിങ്ക് ഡൗൺലോഡ് ചെയ്യാൻ പറ്റിയില്ല. ❌')
+        await update.message.reply_text(f'ക്ഷമിക്കണം, ഈ ലിങ്ക് ഡൗൺലോഡ് ചെയ്യാൻ പറ്റിയില്ല. ❌')
 
 if __name__ == '__main__':
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, download_video))
-    app.run_polling()
+    
+    # Render-ൽ റൺ ചെയ്യാൻ ഇതാണ് നല്ല വഴി
+    app.run_polling(drop_pending_updates=True)
