@@ -1,3 +1,26 @@
+from flask import Flask
+from threading import Thread
+import os
+
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is alive!"
+
+def run():
+  # Render നൽകുന്ന പോർട്ട് ഉപയോഗിക്കുന്നു, ഇല്ലെങ്കിൽ 8080
+  port = int(os.environ.get('PORT', 8080))
+  app.run(host='0.0.0.0', port=port)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
+# നിങ്ങളുടെ ബോട്ടിന്റെ മെയിൻ ഫങ്ക്ഷനുള്ളിൽ ഇത് വിളിക്കുക
+if __name__ == "__main__":
+    keep_alive()
+    # നിങ്ങളുടെ ബോട്ട് സ്റ്റാർട്ട് ചെയ്യാനുള്ള കോഡ് ഇവിടെ നൽകുക
 import os
 import yt_dlp
 import logging
